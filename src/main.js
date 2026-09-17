@@ -1,19 +1,17 @@
 const els = {
-  file: document.querySelector('#mapFile'),
-  drop: document.querySelector('#dropZone'),
   shell: document.querySelector('#mapShell'),
   img: document.querySelector('#mapImage'),
-  empty: document.querySelector('#emptyState'),
   marker: document.querySelector('#marker'),
   coords: document.querySelector('#coords'),
   pixelInfo: document.querySelector('#pixelInfo'),
   copy: document.querySelector('#copyBtn'),
   clear: document.querySelector('#clearBtn'),
   reset: document.querySelector('#resetBtn'),
-  bounds: ['minX', 'maxX', 'minZ', 'maxZ'].reduce((acc, id) => ({ ...acc, [id]: document.querySelector(`#${id}`) }), {}),
+  worldWidth: document.querySelector('#worldWidth'),
+  worldHeight: document.querySelector('#worldHeight'),
 };
 
-const storeKey = 'pixelmap-tracker:v1';
+const storeKey = 'pixelmap-tracker:v2';
 let state = loadState();
 
 function loadState() {
@@ -21,15 +19,11 @@ function loadState() {
   catch { return {}; }
 }
 function saveState() { localStorage.setItem(storeKey, JSON.stringify(state)); }
-function bounds() {
-  return Object.fromEntries(Object.entries(els.bounds).map(([key, el]) => [key, Number(el.value)]));
-}
-function setImage(src) {
-  state.image = src;
-  els.img.src = src;
-  els.img.classList.add('loaded');
-  els.empty.style.display = 'none';
-  saveState();
+function scale() {
+  return {
+    width: Math.max(1, Number(els.worldWidth.value) || 4096),
+    height: Math.max(1, Number(els.worldHeight.value) || 4096),
+  };
 }
 function imageRect() {
   const shell = els.shell.getBoundingClientRect();
@@ -45,11 +39,19 @@ function imageRect() {
   }
   return { left: shell.left + (shell.width - width) / 2, top: shell.top + (shell.height - height) / 2, width, height };
 }
+function pointToCoords(point) {
+  const s = scale();
+  return {
+    x: Math.round((point.u - 0.5) * s.width),
+    z: Math.round((point.v - 0.5) * s.height),
+  };
+}
 function updateMarker() {
   if (!state.point || !els.img.naturalWidth) return;
   const rect = imageRect();
-  els.marker.style.left = `${rect.left - els.shell.getBoundingClientRect().left + state.point.u * rect.width}px`;
-  els.marker.style.top = `${rect.top - els.shell.getBoundingClientRect().top + state.point.v * rect.height}px`;
+  const shell = els.shell.getBoundingClientRect();
+  els.marker.style.left = `${rect.left - shell.left + state.point.u * rect.width}px`;
+  els.marker.style.top = `${rect.top - shell.top + state.point.v * rect.height}px`;
   els.marker.classList.add('visible');
   updateCoords();
 }
@@ -59,18 +61,16 @@ function updateCoords() {
     els.pixelInfo.textContent = 'No point selected yet.';
     return;
   }
-  const b = bounds();
-  const x = b.minX + state.point.u * (b.maxX - b.minX);
-  const z = b.minZ + state.point.v * (b.maxZ - b.minZ);
+  state.coords = pointToCoords(state.point);
   const px = Math.round(state.point.u * els.img.naturalWidth);
   const py = Math.round(state.point.v * els.img.naturalHeight);
-  state.coords = { x: Math.round(x), z: Math.round(z) };
+  const dx = Math.round((state.point.u - 0.5) * 1000) / 10;
+  const dz = Math.round((state.point.v - 0.5) * 1000) / 10;
   els.coords.textContent = `X ${state.coords.x}, Z ${state.coords.z}`;
-  els.pixelInfo.textContent = `Image pixel ${px}, ${py} • ${Math.round(state.point.u * 1000) / 10}% across, ${Math.round(state.point.v * 1000) / 10}% down`;
+  els.pixelInfo.textContent = `Image pixel ${px}, ${py} • ${dx}% X from center, ${dz}% Z from center`;
   saveState();
 }
 function pick(clientX, clientY) {
-  if (!els.img.naturalWidth) return;
   const rect = imageRect();
   const u = (clientX - rect.left) / rect.width;
   const v = (clientY - rect.top) / rect.height;
@@ -78,23 +78,20 @@ function pick(clientX, clientY) {
   state.point = { u, v };
   updateMarker();
 }
-function handleFile(file) {
-  if (!file?.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = () => setImage(reader.result);
-  reader.readAsDataURL(file);
+
+if (state.worldWidth) els.worldWidth.value = state.worldWidth;
+if (state.worldHeight) els.worldHeight.value = state.worldHeight;
+for (const input of [els.worldWidth, els.worldHeight]) {
+  input.addEventListener('input', () => {
+    state.worldWidth = Number(els.worldWidth.value);
+    state.worldHeight = Number(els.worldHeight.value);
+    updateCoords();
+    saveState();
+  });
 }
 
-for (const [key, el] of Object.entries(els.bounds)) {
-  if (state[key] !== undefined) el.value = state[key];
-  el.addEventListener('input', () => { state[key] = Number(el.value); saveState(); updateCoords(); });
-}
-if (state.image) setImage(state.image);
+els.img.addEventListener('load', updateMarker);
 if (state.point) requestAnimationFrame(updateMarker);
-
-els.file.addEventListener('change', event => handleFile(event.target.files[0]));
-els.drop.addEventListener('dragover', event => { event.preventDefault(); els.drop.classList.add('hover'); });
-els.drop.addEventListener('drop', event => { event.preventDefault(); handleFile(event.dataTransfer.files[0]); });
 els.shell.addEventListener('click', event => pick(event.clientX, event.clientY));
 addEventListener('resize', updateMarker);
 els.copy.addEventListener('click', async () => {
@@ -103,5 +100,18 @@ els.copy.addEventListener('click', async () => {
   els.copy.textContent = 'Copied';
   setTimeout(() => els.copy.textContent = 'Copy coords', 900);
 });
-els.clear.addEventListener('click', () => { delete state.point; delete state.coords; els.marker.classList.remove('visible'); updateCoords(); saveState(); });
-els.reset.addEventListener('click', () => { localStorage.removeItem(storeKey); location.reload(); });
+els.clear.addEventListener('click', () => {
+  delete state.point;
+  delete state.coords;
+  els.marker.classList.remove('visible');
+  updateCoords();
+  saveState();
+});
+els.reset.addEventListener('click', () => {
+  els.worldWidth.value = 4096;
+  els.worldHeight.value = 4096;
+  state.worldWidth = 4096;
+  state.worldHeight = 4096;
+  updateCoords();
+  saveState();
+});

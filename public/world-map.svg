@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" shape-rendering="crispEdges">
+  <defs>
+    <filter id="rough"><feTurbulence baseFrequency="0.018" numOctaves="3" seed="17"/><feColorMatrix type="saturate" values="0.8"/><feBlend mode="multiply" in2="SourceGraphic"/></filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" fill="none" stroke="#ffffff" stroke-opacity=".08" stroke-width="2"/></pattern>
+  </defs>
+  <rect width="1024" height="1024" fill="#1e5d75"/>
+  <path d="M0 180c90-40 150-90 260-70s130 90 230 70 130-110 250-90 160 100 284 70v864H0z" fill="#2f8b57"/>
+  <path d="M70 290c85-80 180-65 250-20s120 80 230 40 170-80 275-25 140 135 199 125v614H70z" fill="#4aa35f"/>
+  <path d="M142 150l95 50 70 90-42 112-112 48-103-69 12-132zM665 188l154 20 86 105-35 151-132 62-152-34-50-135zM290 620l145-82 138 28 90 110-33 148-150 72-156-37-72-120z" fill="#d0bd79" opacity=".9"/>
+  <path d="M185 186l52 14 70 90-42 112-70 32 18-109-65-48zM713 215l106-7 86 105-35 151-75 35 20-140-102-60zM360 650l75-112 138 28 90 110-33 148-90 43 5-149-126-32z" fill="#7f6f50" opacity=".45"/>
+  <path d="M0 760c120-20 180-80 260-70s120 90 230 70 160-100 270-60 170 120 264 70v254H0z" fill="#1f6f45" opacity=".72"/>
+  <path d="M500 0c25 140-60 170-25 310s150 120 155 260-95 170-67 310" fill="none" stroke="#63b5cf" stroke-width="30" opacity=".7"/>
+  <path d="M0 500c145 20 235-85 365-45s165 120 300 80 190-110 359-60" fill="none" stroke="#63b5cf" stroke-width="24" opacity=".65"/>
+  <g fill="#2d5b35" opacity=".85">
+    <rect x="120" y="520" width="22" height="22"/><rect x="156" y="552" width="22" height="22"/><rect x="198" y="500" width="22" height="22"/>
+    <rect x="760" y="610" width="22" height="22"/><rect x="805" y="642" width="22" height="22"/><rect x="846" y="595" width="22" height="22"/>
+    <rect x="405" y="220" width="22" height="22"/><rect x="438" y="255" width="22" height="22"/><rect x="470" y="210" width="22" height="22"/>
+    <rect x="265" y="850" width="22" height="22"/><rect x="312" y="825" width="22" height="22"/><rect x="352" y="872" width="22" height="22"/>
+  </g>
+  <rect width="1024" height="1024" fill="url(#grid)"/>
+  <path d="M512 0v1024M0 512h1024" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+  <circle cx="512" cy="512" r="14" fill="#ff4d8d" stroke="#fff" stroke-width="5"/>
+  <text x="526" y="502" font-family="monospace" font-size="24" fill="#fff" stroke="#000" stroke-width="3" paint-order="stroke">0,0</text>
+</svg>

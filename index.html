@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pixel Map Tracker</title>
-  <meta name="description" content="Click a Minecraft pixel map and get estimated world coordinates." />
+  <meta name="description" content="Click a Minecraft world map and get estimated coordinates from center-origin 0,0." />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
@@ -13,26 +13,22 @@
       <div>
         <p class="eyebrow">pixelmap.chaoscat.win</p>
         <h1>Minecraft Pixel Map Tracker</h1>
-        <p class="lede">Load the stream pixel map, set the map bounds, click where the player is, steal the coords. KISS, no accounts, no backend.</p>
+        <p class="lede">One preloaded world map. Click where the player is on stream, get center-origin coordinates. 0,0 is the center, because top-left coords are goblin math.</p>
       </div>
 
-      <label class="file-drop" id="dropZone">
-        <input id="mapFile" type="file" accept="image/*" />
-        <strong>Drop/click to load pixel map</strong>
-        <span>Stored locally in this browser.</span>
-      </label>
-
-      <div class="grid">
-        <label>Left X <input id="minX" type="number" value="-2048" /></label>
-        <label>Right X <input id="maxX" type="number" value="2048" /></label>
-        <label>Top Z <input id="minZ" type="number" value="-2048" /></label>
-        <label>Bottom Z <input id="maxZ" type="number" value="2048" /></label>
+      <div class="calibration-card">
+        <strong>Map scale</strong>
+        <p>Set how many Minecraft blocks the full map spans. The center is always <code>0,0</code>.</p>
+        <div class="grid">
+          <label>Map width in blocks <input id="worldWidth" type="number" value="4096" min="1" /></label>
+          <label>Map height in blocks <input id="worldHeight" type="number" value="4096" min="1" /></label>
+        </div>
       </div>
 
       <div class="actions">
         <button id="copyBtn" type="button">Copy coords</button>
         <button id="clearBtn" type="button">Clear marker</button>
-        <button id="resetBtn" type="button">Reset all</button>
+        <button id="resetBtn" type="button">Reset scale</button>
       </div>
 
       <div class="result" aria-live="polite">
@@ -42,17 +38,14 @@
       </div>
 
       <details>
-        <summary>How calibration works</summary>
-        <p>Enter the world coordinates represented by the left/right/top/bottom edges of the image. The tracker linearly maps image pixels to X/Z. If north/south is flipped on your map, swap Top Z and Bottom Z.</p>
+        <summary>Coordinate math</summary>
+        <p>The image center is <code>X 0, Z 0</code>. Horizontal movement changes X. Vertical movement changes Z. Top edge is negative Z, bottom edge is positive Z.</p>
       </details>
     </section>
 
     <section class="map-shell" id="mapShell">
-      <div class="empty" id="emptyState">
-        <div>🧭</div>
-        <p>Load a map image to begin.</p>
-      </div>
-      <img id="mapImage" alt="Minecraft pixel map" />
+      <img id="mapImage" src="/world-map.svg" alt="Minecraft world map" />
+      <div class="crosshair" aria-hidden="true"></div>
       <button id="marker" type="button" aria-label="Selected position"></button>
     </section>
   </main>
