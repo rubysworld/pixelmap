@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Map Tracker</title>
+  <meta name="description" content="Click a Minecraft pixel map and get estimated world coordinates." />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <div>
+        <p class="eyebrow">pixelmap.chaoscat.win</p>
+        <h1>Minecraft Pixel Map Tracker</h1>
+        <p class="lede">Load the stream pixel map, set the map bounds, click where the player is, steal the coords. KISS, no accounts, no backend.</p>
+      </div>
+
+      <label class="file-drop" id="dropZone">
+        <input id="mapFile" type="file" accept="image/*" />
+        <strong>Drop/click to load pixel map</strong>
+        <span>Stored locally in this browser.</span>
+      </label>
+
+      <div class="grid">
+        <label>Left X <input id="minX" type="number" value="-2048" /></label>
+        <label>Right X <input id="maxX" type="number" value="2048" /></label>
+        <label>Top Z <input id="minZ" type="number" value="-2048" /></label>
+        <label>Bottom Z <input id="maxZ" type="number" value="2048" /></label>
+      </div>
+
+      <div class="actions">
+        <button id="copyBtn" type="button">Copy coords</button>
+        <button id="clearBtn" type="button">Clear marker</button>
+        <button id="resetBtn" type="button">Reset all</button>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <span>Selected coords</span>
+        <strong id="coords">click the map</strong>
+        <small id="pixelInfo">No point selected yet.</small>
+      </div>
+
+      <details>
+        <summary>How calibration works</summary>
+        <p>Enter the world coordinates represented by the left/right/top/bottom edges of the image. The tracker linearly maps image pixels to X/Z. If north/south is flipped on your map, swap Top Z and Bottom Z.</p>
+      </details>
+    </section>
+
+    <section class="map-shell" id="mapShell">
+      <div class="empty" id="emptyState">
+        <div>🧭</div>
+        <p>Load a map image to begin.</p>
+      </div>
+      <img id="mapImage" alt="Minecraft pixel map" />
+      <button id="marker" type="button" aria-label="Selected position"></button>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
