@@ -46,6 +46,9 @@ function pointToCoords(point) {
     z: Math.round((point.v - 0.5) * s.height),
   };
 }
+function clamp(value, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
 function updateMarker() {
   if (!state.point || !els.img.naturalWidth) return;
   const rect = imageRect();
@@ -93,6 +96,24 @@ for (const input of [els.worldWidth, els.worldHeight]) {
 els.img.addEventListener('load', updateMarker);
 if (state.point) requestAnimationFrame(updateMarker);
 els.shell.addEventListener('click', event => pick(event.clientX, event.clientY));
+addEventListener('keydown', event => {
+  if (!state.point || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+  const directions = {
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+  };
+  const direction = directions[event.key];
+  if (!direction) return;
+  event.preventDefault();
+  const step = (event.shiftKey ? 10 : 1) / Math.max(els.img.naturalWidth || 1, els.img.naturalHeight || 1);
+  state.point = {
+    u: clamp(state.point.u + direction[0] * step),
+    v: clamp(state.point.v + direction[1] * step),
+  };
+  updateMarker();
+});
 addEventListener('resize', updateMarker);
 els.copy.addEventListener('click', async () => {
   if (!state.coords) return;
